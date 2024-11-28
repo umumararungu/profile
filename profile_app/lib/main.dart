@@ -8,29 +8,20 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: UserProfileScreen(),
-    );
-  }
-}
-
 class UserProfileScreen extends StatelessWidget {
   UserProfileScreen({Key? key}) : super(key: key);
-  
-  // Get the instance of UserController
-  final UserController controller = Get.find();
 
+  final UserController controller = Get.find();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    nameController.text = controller.name.value;
+    emailController.text = controller.email.value;
+    ageController.text = controller.age.value.toString();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('User Profile'),
@@ -39,7 +30,7 @@ class UserProfileScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            // Obx widget to display name
+            // Display Name
             Obx(() => Text('Name: ${controller.name}', style: TextStyle(fontSize: 20))),
             TextField(
               controller: nameController,
@@ -47,13 +38,17 @@ class UserProfileScreen extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                controller.changeName(nameController.text);
+                if (nameController.text.isNotEmpty) {
+                  controller.changeName(nameController.text);
+                } else {
+                  Get.snackbar('Error', 'Name cannot be empty');
+                }
               },
               child: Text('Update Name'),
             ),
             SizedBox(height: 20),
 
-            // Obx widget to display email
+            // Display Email
             Obx(() => Text('Email: ${controller.email}', style: TextStyle(fontSize: 20))),
             TextField(
               controller: emailController,
@@ -61,13 +56,17 @@ class UserProfileScreen extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                controller.changeEmail(emailController.text);
+                if (GetUtils.isEmail(emailController.text)) {
+                  controller.changeEmail(emailController.text);
+                } else {
+                  Get.snackbar('Error', 'Enter a valid email');
+                }
               },
               child: Text('Update Email'),
             ),
             SizedBox(height: 20),
 
-            // Obx widget to display age
+            // Display Age
             Obx(() => Text('Age: ${controller.age}', style: TextStyle(fontSize: 20))),
             TextField(
               controller: ageController,
@@ -76,8 +75,12 @@ class UserProfileScreen extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                int newAge = int.tryParse(ageController.text) ?? 0;
-                controller.changeAge(newAge);
+                int newAge = int.tryParse(ageController.text) ?? -1;
+                if (newAge > 0) {
+                  controller.changeAge(newAge);
+                } else {
+                  Get.snackbar('Error', 'Please enter a valid age');
+                }
               },
               child: Text('Update Age'),
             ),
